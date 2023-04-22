@@ -1,5 +1,6 @@
 package com.ylan.test.Service;
 
+import com.ylan.spring.anno.Autowired;
 import com.ylan.spring.anno.Component;
 
 /**

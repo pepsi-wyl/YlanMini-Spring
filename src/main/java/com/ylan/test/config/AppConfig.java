@@ -1,4 +1,4 @@
-package com.ylan.test;
+package com.ylan.test.config;
 
 import com.ylan.spring.anno.ComponentScan;
 
