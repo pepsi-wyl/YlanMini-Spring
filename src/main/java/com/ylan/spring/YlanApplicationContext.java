@@ -8,6 +8,8 @@ import com.ylan.spring.interfaces.*;
 
 import java.io.File;
 import java.lang.reflect.*;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -78,6 +80,10 @@ public class YlanApplicationContext {
             String path = componentScanAnnotation.value().replace(".", "/"); // com/ylan/test
             File file = new File(Thread.currentThread().getContextClassLoader().getResource(path).getFile());  // G:\Coding\java\Spring-Ylan\target\classes\com\ylan\test
             System.out.println("[[[[[[   MSG   ComponentScan 扫描路径 >>>>>> " + file);
+
+            // 路径中存在空格等字符，经过 classLoader.getResource 方法后变成了Unicode编码
+            String absolutePath = file.getAbsolutePath();
+            file = new File(URLDecoder.decode(absolutePath, StandardCharsets.UTF_8));
 
             // 递归扫描包绝对路径 得到一系列 BeanDefinition 并放入 beanDefinitionMap
             createBeanDefinition(file);
