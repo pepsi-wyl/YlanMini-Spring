@@ -1,9 +1,7 @@
 package com.ylan.spring.aop;
 
-/**
- * 提供调用切面方法的类
- * 单例工厂，每次返回相同的对象，计划从容器中拿
- */
+
+// 提供调用切面方法的类   单例工厂，每次返回相同的对象，计划从容器中拿
 public class SingletonAspectInstanceFactory implements AspectInstanceFactory{
 
     private Object aspectInstance;
@@ -12,6 +10,7 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory{
         this.aspectInstance = aspectInstance;
     }
 
+    // 提供调用切面方法的类
     @Override
     public Object getAspectInstance() {
         return this.aspectInstance;

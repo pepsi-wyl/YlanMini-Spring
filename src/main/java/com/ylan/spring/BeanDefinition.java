@@ -11,7 +11,7 @@ public class BeanDefinition {
     private Class clazz;
     private String scope;
 
-    // 单例对象
+    // 是否为单例对象
     public boolean isSingleton() {
         return "singleton".equals(scope);
     }

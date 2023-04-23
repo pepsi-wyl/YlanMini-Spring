@@ -16,16 +16,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 容器启动
- * 扫描BeanDefinition
- * Bean的生命周期
- * 单例与多例Bean
- * 依赖注入
- * Aware回调  BeanNameAware ApplicationContextAware
- * InitializingBean
- * BeanPostProcessor
- * AOP
- *
  * @author by pepsi-wyl
  * @date 2023-04-19 20:34
  */
@@ -39,16 +29,16 @@ public class YlanApplicationContext {
     // 一级缓存 单例池 beanName -> beanObj
     private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
-    // 二级缓存 Cache of early singleton objects: bean name to bean instance.
+    // 二级缓存 缓存提前曝光的实例 Cache of early singleton objects: bean name to bean instance.
     private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(16);
 
-    // 三级缓存 Cache of singleton factories: bean name to ObjectFactory.
+    // 三级缓存 缓存提前曝光的工厂 Cache of singleton factories: bean name to ObjectFactory.
     private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
     // BeanPostProcessorList
     private final List<BeanPostProcessor> beanPostProcessorList = new ArrayList<>();
 
-    // Disposable bean instances: bean name to disposable instance.
+    // DisposableBeanMap 对象销毁集合
     private final Map<String, Object> disposableBeans = new LinkedHashMap<>();
 
     // 当前正在创建的单例对象
@@ -82,8 +72,8 @@ public class YlanApplicationContext {
             System.out.println("[[[[[[   MSG   ComponentScan 扫描路径 >>>>>> " + file);
 
             // 路径中存在空格等字符，经过 classLoader.getResource 方法后变成了Unicode编码
-            String absolutePath = file.getAbsolutePath();
-            file = new File(URLDecoder.decode(absolutePath, StandardCharsets.UTF_8));
+//            String absolutePath = file.getAbsolutePath();
+//            file = new File(URLDecoder.decode(absolutePath, StandardCharsets.UTF_8));
 
             // 递归扫描包绝对路径 得到一系列 BeanDefinition 并放入 beanDefinitionMap
             createBeanDefinition(file);
@@ -221,7 +211,7 @@ public class YlanApplicationContext {
             // 单例
             if (beanDefinition.isSingleton()) {
 
-                // 从三处缓存中获取单例对象
+                // 尝试依次从 3 处缓存中取 3级缓存中有表达式对象对象，则生成Bean对象，放入二级缓存
                 Object singletonObject = getSingleton(beanName, true);
 
                 // 三处缓存中都没该bean，create即可
@@ -250,7 +240,7 @@ public class YlanApplicationContext {
         return (T) getBean(beanName);
     }
 
-    // 尝试依次从 3 处缓存中取
+    // 尝试依次从 3 处缓存中取 3级缓存中有表达式对象对象，则生成Bean对象，放入二级缓存
     // allowEarlyReference 是否应该创建早期引用 bean 初始化后应该检查二级缓存是否提前创建了 bean，此时 allowEarlyReference 为 false，只检查到二级缓存即可
     private Object getSingleton(String beanName, boolean allowEarlyReference) {
 
@@ -264,10 +254,10 @@ public class YlanApplicationContext {
 
                 // 三级缓存：单例工厂池
                 ObjectFactory<?> objectFactory = this.singletonFactories.get(beanName);
+                // 缓存移位操作
                 if (objectFactory != null) {
                     // 调用Lambda表达式 生成Bean对象
                     singletonObject = objectFactory.getObject();
-
                     // 放入二级缓存
                     this.earlySingletonObjects.put(beanName, singletonObject);
                     this.singletonFactories.remove(beanName);
@@ -294,7 +284,6 @@ public class YlanApplicationContext {
             // 创建的对象是单例对象，依赖注入前将工厂对象 fa 存入三级缓存 singletonFactories 中
             // 1.利用Lambda表达式生成Bean对象  2.提前执行AOP
             if (beanDefinition.isSingleton()) {
-
                 System.out.println("[[[[[[   MSG   createBean：Eagerly caching bean '" + beanName + "' to allow for resolving potential circular references");
 
                 // 放入三级缓存
@@ -302,18 +291,19 @@ public class YlanApplicationContext {
                     // 赋值Bean至exposedObject中
                     Object exposedObject = bean;
 
-                    // 遍历BeanPostProcessor
+                    // 遍历BeanPostProcessor 查找 AnnotationAwareAspectJAutoProxyCreator 准备创建代理类
                     for (BeanPostProcessor beanPostProcessor : YlanApplicationContext.this.beanPostProcessorList) {
 
-                        // 用于发生循环依赖时，提前对 bean 创建代理对象，这样注入的就是代理对象，而不是原始对象
+                        // 发生循环依赖时，提前对 bean 创建代理对象，这样注入的就是代理对象，而不是原始对象
                         if (beanPostProcessor instanceof SmartInstantiationAwareBeanPostProcessor) {
-                            // 生成Lambda对象
+                            // 生成 Lambda 对象
+                            // 调用 getEarlyBeanReference 方法 提前生成代理对象 返回表达式对象
                             SmartInstantiationAwareBeanPostProcessor smartInstantiationAwareBeanPostProcessor = (SmartInstantiationAwareBeanPostProcessor) beanPostProcessor;
                             exposedObject = smartInstantiationAwareBeanPostProcessor.getEarlyBeanReference(exposedObject, beanName);
                         }
                     }
 
-                    // 返回Lambda对象
+                    // 返回 Lambda对象
                     return exposedObject;
                 });
 
@@ -321,20 +311,22 @@ public class YlanApplicationContext {
                 this.earlySingletonObjects.remove(beanName);
             }
 
-            Object exposedObject = bean;
-
             // 填充属性 依赖注入阶段
             populateBean(beanName, beanDefinition, bean);
+
+            // 经过 AnnotationAwareAspectJAutoProxyCreator 代理过后的Bean
+            Object exposedObject = bean;
 
             // 初始化
             exposedObject = initializeBean(beanName, beanDefinition, exposedObject);
 
-            // 去二级缓存 earlySingletonObjects 中查看有没有当前 bean，
+            // 存在提前曝光情况下     去二级缓存 earlySingletonObjects 中查看有没有当前 bean，
             // 如果有，说明发生了循环依赖，返回缓存中的 a 对象(可能是代理对象也可能是原始对象，主要看有没有切点匹配到 bean)
             if (beanDefinition.isSingleton()) {
                 // false 只检测到二级缓存
                 Object earlySingletonReference = getSingleton(beanName, false);
                 if (earlySingletonReference != null) {
+                    // 将二级缓存中的提前AOP代理的bean赋值给exposedObject，并返回
                     exposedObject = earlySingletonReference;
                 }
             }
@@ -449,7 +441,7 @@ public class YlanApplicationContext {
             Parameter parameter = parameters[i];
 
             Object arg = null;
-            // ObjectFactory 参数
+            // 加了 ObjectFactory 参数
             if (parameter.getType().equals(ObjectFactory.class)) {
                 arg = buildLazyObjectFactory(parameter.getName());
             }
@@ -541,7 +533,7 @@ public class YlanApplicationContext {
             ((InitializingBean) (bean)).afterPropertiesSet();
         }
 
-        // 初始化后，由 AnnotationAwareAspectJAutoProxyCreator 创建 aop 代理
+        // 初始化后，由 AnnotationAwareAspectJAutoProxyCreator 创建 AOP 代理 对象提前曝光到二级缓存中，不会在次代理
         for (BeanPostProcessor beanPostProcessor : beanPostProcessorList) {
             bean = beanPostProcessor.postProcessAfterInitialization(bean, beanName);
         }
@@ -552,7 +544,9 @@ public class YlanApplicationContext {
 
     // 注册 DisposableBean 注册的是原始对象，而不是代理对象
     private void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
+        // 对象是单例 并且 有销毁方法
         if (beanDefinition.isSingleton() && DisposableBeanAdapter.hasDestroyMethod(bean, beanDefinition)) {
+            // 注册进 对象销毁集合中去
             this.disposableBeans.put(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
         }
     }
@@ -567,8 +561,9 @@ public class YlanApplicationContext {
         this.singletonFactories.remove(beanName);
     }
 
-    // 关闭工厂
+    // 关闭ApplicationContext
     public void close() {
+        // 销毁单例池
         destroySingletons();
     }
 
@@ -578,23 +573,31 @@ public class YlanApplicationContext {
         synchronized (this.disposableBeans) {
             Set<Map.Entry<String, Object>> entrySet = this.disposableBeans.entrySet();
             Iterator<Map.Entry<String, Object>> it = entrySet.iterator();
+            // 遍历对象销毁集合
             while (it.hasNext()) {
                 Map.Entry<String, Object> entry = it.next();
                 String beanName = entry.getKey();
                 DisposableBean bean = (DisposableBean) entry.getValue();
                 try {
-                    // 销毁对象
+                    // 调用销毁对象方法
                     bean.destroy();
                 } catch (Exception e) {
-                    System.out.println("Destruction of bean with name '" + beanName + "' threw an exception：" + e);
+                    // 销毁对象异常
+                    System.out.println("[[[[[[   MSG   Destruction of bean with name '" + beanName + "' threw an exception：" + e);
                 }
+                // 将该对象从对象销毁集合移除
                 it.remove();
             }
         }
-        // Clear all cached singleton instances in this registry.
+        // 清空缓存 Clear all cached singleton instances in this registry.
         this.singletonObjects.clear();
         this.earlySingletonObjects.clear();
         this.singletonFactories.clear();
+    }
+
+    // 返回所有BeanName
+    public ArrayList<String> getBeanNames() {
+        return new ArrayList<>(beanDefinitionMap.keySet());
     }
 
     // 返回所有BeanClass
@@ -603,10 +606,5 @@ public class YlanApplicationContext {
                 .map(
                         (Function<BeanDefinition, Class<?>>) BeanDefinition::getClazz
                 ).collect(Collectors.toList());
-    }
-
-    // 返回所有BeanName
-    public ArrayList<String> getBeanNames() {
-        return new ArrayList<>(beanDefinitionMap.keySet());
     }
 }

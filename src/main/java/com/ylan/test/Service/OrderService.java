@@ -8,7 +8,7 @@ import com.ylan.spring.anno.Component;
  * @date 2023-04-20 19:00
  */
 
-@Component("orderService")
+//@Component("orderService")
 public class OrderService {
 
 }

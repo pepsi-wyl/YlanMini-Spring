@@ -6,4 +6,5 @@ package com.ylan.spring.aop.advisor;
  */
 
 public interface Interceptor extends Advice{
+
 }

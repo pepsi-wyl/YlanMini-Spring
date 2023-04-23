@@ -9,19 +9,9 @@ package com.ylan.spring.aop.advisor.joinpoint;
  */
 
 public interface JoinPoint {
-
-    /**
-     * 获取执行链中目标方法的实参
-     *
-     * @return
-     */
+    // 获取执行链中目标方法的实参
     Object[] getArgs();
 
-    /**
-     * 获取执行链中目标方法的方法名
-     *
-     * @return
-     */
+    // 获取执行链中目标方法的方法名
     String getMethodName();
-
 }

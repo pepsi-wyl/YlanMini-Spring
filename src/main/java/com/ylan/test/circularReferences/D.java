@@ -9,7 +9,7 @@ import com.ylan.spring.anno.Lazy;
  * @date 2023-04-22 10:48
  */
 
-@Component("d")
+//@Component("d")
 public class D implements CDInterface {
 
     // 采用 JDK 动态代理，注入的类型需要是接口类型

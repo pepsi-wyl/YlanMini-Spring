@@ -12,7 +12,7 @@ import com.ylan.spring.interfaces.DisposableBean;
 
 // A B 循环引用 需要至少有一个是单例Bean
 
-@Component("b")
+//@Component("b")
 //@Scope("prototype")
 public class B implements DisposableBean {
     @Autowired

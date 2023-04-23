@@ -2,13 +2,8 @@ package com.ylan.spring.aop.advisor;
 
 import java.lang.reflect.Method;
 
-/**
- * 既是 Pointcut，又是 MethodMatcher
- *
- * @author by pepsi-wyl
- * @date 2023-04-20 21:21
- */
 
+// 既是 Pointcut，又是 MethodMatcher
 public class AspectJExpressionPointcut implements Pointcut, MethodMatcher {
 
     private String expression;
