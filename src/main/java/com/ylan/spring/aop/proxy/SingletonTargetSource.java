@@ -1,7 +1,7 @@
 package com.ylan.spring.aop.proxy;
 
 
-// 从这个目标源取得的目标对象是单例
+// 从这个目标源取得的目标对象是单例 做对象池和多例
 public class SingletonTargetSource implements TargetSource {
 
     private final Object target;

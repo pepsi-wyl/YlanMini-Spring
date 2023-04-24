@@ -1,4 +1,4 @@
-package com.ylan.spring.aop.anno;
+package com.ylan.spring.aop.advisor;
 
 
 import com.ylan.spring.aop.AspectInstanceFactory;
@@ -12,6 +12,7 @@ import com.ylan.spring.aop.advisor.joinpoint.ProceedingJoinPoint;
 import java.lang.reflect.Method;
 
 
+// Around 通知类
 public class AroundAdvice extends CommonAdvice implements Advice, MethodInterceptor {
 
     public AroundAdvice(Method aspectJAdviceMethod, AspectInstanceFactory aspectInstanceFactory) {

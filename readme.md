@@ -1,4 +1,5 @@
 # YlanMini-Spring
+![img_1.png](img/img_1.png)  
 主要实现了 IOC 和 AOP 功能
 ## IOC
 ### refresh 流程
@@ -30,14 +31,7 @@
 - 代理(JDK 生成动态代理对象)
 - 责任链(通知的链式调用)
 - 适配器(适配各种销毁方法的调用)
-## 一个小BUG
-不过有个小问题，这个问题与 SpringBoot 3.0.3 版本中的BUG类似，都是路径中存在空格等字符，经过 classLoader.getResource 方法后变成了Unicode编码
-```java
-ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-// 取得绝对路径: /Users/mafei007/AppProjects/IdeaProjects/spring_study/out/production/simple_impl/com/mafei/test
-URL resource = classLoader.getResource(path);
-File file = new File(resource.getFile());
-// 此处进行解码即可
-String absolutePath = file.getAbsolutePath();
-file = new File(URLDecoder.decode(absolutePath, StandardCharsets.UTF_8));
-```
+
+## 致谢
+Spring IOC源码解析 https://blog.csdn.net/chaitoudaren/category_9799707.html  
+Spring AOP源码解析 https://blog.csdn.net/chaitoudaren/category_9803816.html

@@ -50,6 +50,8 @@ public class YlanApplicationContext {
 
     // 构造器
     public YlanApplicationContext(Class<?> configClass) {
+        banner(); // Banner图片
+
         // 扫描Bean生成BeanDefinition放入BeanDefinitionMap中
         scanBeanDefinition(configClass);
 
@@ -58,6 +60,20 @@ public class YlanApplicationContext {
 
         // 将扫描到的单例 bean 创建出来放到单例池中
         preInstantiateSingletons();
+    }
+
+    // Banner 图标
+    private void banner() {
+        System.out.println();
+        System.out.println("---------------------------------------------------------------------------");
+        System.out.println(" __   ___             __  __ _       _      ____             _              \n" +
+                " \\ \\ / / | __ _ _ __ |  \\/  (_)_ __ (_)    / ___| _ __  _ __(_)_ __   __ _  \n" +
+                "  \\ V /| |/ _` | '_ \\| |\\/| | | '_ \\| |____\\___ \\| '_ \\| '__| | '_ \\ / _` | \n" +
+                "   | | | | (_| | | | | |  | | | | | | |_____|__) | |_) | |  | | | | | (_| | \n" +
+                "   |_| |_|\\__,_|_| |_|_|  |_|_|_| |_|_|    |____/| .__/|_|  |_|_| |_|\\__, | \n" +
+                "                                                 |_|                 |___/  ");
+        System.out.println("---------------------------------------------------------------------------");
+        System.out.println();
     }
 
     // 扫描 BeanDefinition
@@ -460,7 +476,7 @@ public class YlanApplicationContext {
         return constructor.newInstance(args);
     }
 
-    //
+    // 加了 ObjectFactory 参数
     private Object buildLazyObjectFactory(String requestingBeanName) {
         return new ObjectFactory<Object>() {
             @Override
@@ -473,13 +489,17 @@ public class YlanApplicationContext {
     // 加了 @Lazy 的参数, 生成代理
     private Object buildLazyResolutionProxy(String requestingBeanName, Class<?> clazz) {
         LazyInjectTargetSource targetSource = new LazyInjectTargetSource(this, requestingBeanName);
-        ProxyFactory proxyFactory = new ProxyFactory();
-        proxyFactory.setTargetSource(targetSource);
-        proxyFactory.setInterfaces(clazz.getInterfaces());
+
+        // 实际为 ProxyConfig  每个代理对象都持有一个 ProxyFactory, 一个 ProxyFactory 只能生产一个代理对象
+        ProxyFactory proxyFactory = new ProxyFactory();      // 创建代理工厂
+        proxyFactory.setTargetSource(targetSource);          // 设置需要代理的对象目标源
+        proxyFactory.setInterfaces(clazz.getInterfaces());   // 设置接口
+
         // 临时的解决方案，JDK 动态代理只能基于接口，要代理的 class 可能本身是个接口，添加进去
         if (clazz.isInterface()) {
             proxyFactory.addInterface(clazz);
         }
+
         System.out.println("[[[[[[   MSG   使用Lazy有参构造，为 " + requestingBeanName + " 参数创建代理对象");
         return proxyFactory.getProxy();
     }

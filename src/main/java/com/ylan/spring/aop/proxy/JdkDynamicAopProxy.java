@@ -65,28 +65,32 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
             target = targetSource.getTarget();        // 对象目标源获取目标对象
             Class<?> targetClass = target.getClass(); // 目标对象获取对象Class
 
-            // 得到此 method 的拦截器链，就是一堆环绕通知
-            // 需要根据 invoke 的 method 来做进一步确定，过滤出应用在这个 method 上的 Advice
+            // 获取此 method 拦截器链
             List<Interceptor> chain = this.proxyFactory.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 
-            // 执行 chain
+            // 执行 chain     拦截器为空，直接调用切点方法
             if (chain.isEmpty()) {
+                // 触发目标类方法 return method.invoke(target, args);
                 retVal = AopUtils.invokeJoinpointUsingReflection(target, method, args);
-            } else {
+            }
+            // 执行 chain     拦截器不为空，将拦截器统一封装成DefaultMethodInvocation
+            else {
+                // 将拦截器统一封装成DefaultMethodInvocation
                 DefaultMethodInvocation methodInvocation = new DefaultMethodInvocation(target, method, args, chain);
+                // 执行拦截器链
                 retVal = methodInvocation.proceed();
             }
 
             // 处理特殊的返回值 this
             Class<?> returnType = method.getReturnType();
-            if (retVal != null && retVal == target &&
-                    returnType != Object.class && returnType.isInstance(proxy)) {
+            if (retVal != null && retVal == target && returnType != Object.class && returnType.isInstance(proxy)) {
                 retVal = proxy;
             }
 
             return retVal;
 
         } finally {
+
             // setProxyContext 为 True
             if (setProxyContext) {
                 // Restore old proxy.

@@ -1,5 +1,4 @@
-package com.ylan.spring.aop.anno;
-
+package com.ylan.spring.aop.advisor;
 
 import com.ylan.spring.aop.AspectInstanceFactory;
 import com.ylan.spring.aop.advisor.Advice;
@@ -9,25 +8,27 @@ import com.ylan.spring.aop.advisor.MethodInvocation;
 
 import java.lang.reflect.Method;
 
-public class AfterReturningAdvice extends CommonAdvice implements Advice, MethodInterceptor {
 
-    public AfterReturningAdvice(Method aspectJAdviceMethod, AspectInstanceFactory aspectInstanceFactory) {
+// Before 通知类
+public class BeforeAdvice extends CommonAdvice implements Advice, MethodInterceptor {
+
+    public BeforeAdvice(Method aspectJAdviceMethod, AspectInstanceFactory aspectInstanceFactory) {
         super(aspectJAdviceMethod, aspectInstanceFactory);
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        Object retVal = invocation.proceed();
-        afterReturning();
-        return retVal;
+        before();
+        return invocation.proceed();
     }
 
-    public void afterReturning() throws Throwable {
-        invokeAdviceMethod(null,null);
+    public void before() throws Throwable {
+        invokeAdviceMethod(null, null);
     }
 
+    // 排序方法
     @Override
     public int getOrder() {
-        return 2;
+        return 0;
     }
 }

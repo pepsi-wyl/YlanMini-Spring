@@ -1,12 +1,8 @@
 package com.ylan.spring.aop.advisor;
 
-/**
- * 环绕通知
- *
- * @author by pepsi-wyl
- * @date 2023-04-20 21:17
- */
 
+// 方法拦截器接口
 public interface MethodInterceptor extends Interceptor {
+    // invoke 触发目标类方法
     Object invoke(MethodInvocation invocation) throws Throwable;
 }

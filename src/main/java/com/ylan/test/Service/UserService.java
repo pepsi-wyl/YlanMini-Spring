@@ -11,7 +11,7 @@ import com.ylan.spring.interfaces.InitializingBean;
  * @date 2023-04-20 15:35
  */
 
-//@Component("userService")
+@Component("userService")
 @Scope("prototype")
 public class UserService implements BeanNameAware, InitializingBean {
 

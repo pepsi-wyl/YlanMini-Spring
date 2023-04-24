@@ -12,10 +12,12 @@ import java.util.List;
 
 public class DefaultMethodInvocation implements MethodInvocation {
 
-    private Object target;
-    private Method method;
-    private Object[] args;
-    List<?> methodInterceptorList;
+    private Object target;  // 代理对象
+    private Method method;  // 代理对象方法
+    private Object[] args;  // 代理对象方法参数
+
+    List<?> methodInterceptorList; //
+
     // 调用位置
     private int currentInterceptorIndex = -1;
 
@@ -30,17 +32,20 @@ public class DefaultMethodInvocation implements MethodInvocation {
         this.methodInterceptorList = methodInterceptorList;
     }
 
+    //
     @Override
     public Object proceed() throws Throwable {
-        // 调用目标， 返回并结束递归
+        // 调用目标, 返回并结束递归
         if (this.currentInterceptorIndex == this.methodInterceptorList.size() - 1) {
+            // 触发目标类方法 return method.invoke(target, args);
             return invokeJoinpoint();
         }
         // 逐一调用通知, currentInterceptorIndex + 1
-        Object methodInterceptor = this.methodInterceptorList.get(++currentInterceptorIndex);
-        return ((MethodInterceptor) methodInterceptor).invoke(this);
+        MethodInterceptor methodInterceptor = (MethodInterceptor) this.methodInterceptorList.get(++currentInterceptorIndex);
+        return methodInterceptor.invoke(this);
     }
 
+    // 触发目标类方法 return method.invoke(target, args);
     protected Object invokeJoinpoint() throws Throwable {
         return AopUtils.invokeJoinpointUsingReflection(this.target, this.method, this.args);
     }

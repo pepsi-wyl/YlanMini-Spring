@@ -9,23 +9,23 @@ import java.lang.reflect.Method;
 
 /**
  * @author by pepsi-wyl
- * @date 2023-04-20 21:20
+ * @date 2023-04-23 21:20
  */
 
+
+// 公共通知类
 public abstract class CommonAdvice implements Advice, Ordered {
 
+    // 切面方法
     private Method aspectJAdviceMethod;
+
+    // 提供调用切面方法的类工厂
     private AspectInstanceFactory aspectInstanceFactory;
 
-    /**
-     * 默认拦截所有的异常类型
-     */
+    // 默认拦截所有的异常类型
     private Class<?> discoveredThrowingType = Object.class;
 
-    /**
-     * @AfterThrowing( value = "execution(* foo())", throwing = "java.lang.ClassNotFoundException")
-     * throwing 的值
-     */
+    // @AfterThrowing( value = "execution(* foo())", throwing = "java.lang.ClassNotFoundException") 中 throwing 的值
     private String throwingName;
 
     public CommonAdvice(Method aspectJAdviceMethod, AspectInstanceFactory aspectInstanceFactory) {
@@ -34,12 +34,7 @@ public abstract class CommonAdvice implements Advice, Ordered {
         this.aspectInstanceFactory = aspectInstanceFactory;
     }
 
-
-    /**
-     * 调用通知方法，完成简单的参数回显解析
-     *
-     * @return
-     */
+    // 调用通知方法，完成简单的参数回显解析
     protected Object invokeAdviceMethod(ProceedingJoinPoint pjp, Throwable ex) throws Throwable {
         // 准备方法参数
         int parameterCount = this.aspectJAdviceMethod.getParameterCount();

@@ -1,4 +1,4 @@
-package com.ylan.spring.aop.anno;
+package com.ylan.spring.aop.advisor;
 
 
 import com.ylan.spring.aop.AspectInstanceFactory;
@@ -9,7 +9,7 @@ import com.ylan.spring.aop.advisor.MethodInvocation;
 
 import java.lang.reflect.Method;
 
-
+// AfterThrowing 通知类
 public class AfterThrowingAdvice extends CommonAdvice implements Advice, MethodInterceptor {
 
     public AfterThrowingAdvice(Method aspectJAdviceMethod, AspectInstanceFactory aspectInstanceFactory) {
