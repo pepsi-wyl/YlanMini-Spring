@@ -119,7 +119,7 @@ public class ProxyFactory {
         }
     }
 
-    // 获取此 method 拦截器链
+    // 获取此 method 拦截器链 Advice集合
     // 需要根据 invoke 的 method 来做进一步确定，过滤出应用在这个 method 上的 Advice
     public List<Interceptor> getInterceptorsAndDynamicInterceptionAdvice(Method method, Class<?> targetClass) {
         // 拦截器集合

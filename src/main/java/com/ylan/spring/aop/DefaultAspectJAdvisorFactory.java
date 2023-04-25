@@ -1,7 +1,6 @@
 package com.ylan.spring.aop;
 
-import com.ylan.spring.aop.AspectJAdvisorFactory;
-import com.ylan.spring.aop.PrototypeAspectInstanceFactory;
+import com.ylan.spring.interfaces.AspectJAdvisorFactory;
 import com.ylan.spring.aop.advisor.*;
 import com.ylan.spring.aop.advisor.joinpoint.ProceedingJoinPoint;
 import com.ylan.spring.aop.anno.*;
@@ -37,7 +36,7 @@ public class DefaultAspectJAdvisorFactory implements AspectJAdvisorFactory {
                 AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();   // 既是 Pointcut, 又是 MethodMatcher
                 pointcut.setExpression(expression);                                     // 设置切点表达式
 
-                // 通知 (最终都是环绕通知)
+                // 通知 (最终都是环绕通知)               通知注解标记的方法   切面注解标记的类的Class
                 BeforeAdvice advice = new BeforeAdvice(method, aspectInstanceFactory);  // 设置 Before 通知
 
                 // 切面

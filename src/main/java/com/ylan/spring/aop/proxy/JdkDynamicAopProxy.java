@@ -65,7 +65,7 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
             target = targetSource.getTarget();        // 对象目标源获取目标对象
             Class<?> targetClass = target.getClass(); // 目标对象获取对象Class
 
-            // 获取此 method 拦截器链
+            // 获取此 method 拦截器链   Advice集合
             List<Interceptor> chain = this.proxyFactory.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 
             // 执行 chain     拦截器为空，直接调用切点方法

@@ -1,81 +1,83 @@
 package com.ylan.spring.aop.advisor;
 
-import com.ylan.spring.aop.AspectInstanceFactory;
+import com.ylan.spring.interfaces.AspectInstanceFactory;
 import com.ylan.spring.aop.advisor.joinpoint.ProceedingJoinPoint;
 import com.ylan.spring.core.Ordered;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-/**
- * @author by pepsi-wyl
- * @date 2023-04-23 21:20
- */
-
 
 // 公共通知类
 public abstract class CommonAdvice implements Advice, Ordered {
 
-    // 切面方法
+    // 通知注解标记的方法
     private Method aspectJAdviceMethod;
 
-    // 提供调用切面方法的类工厂
+    // 切面注解标记的类的Class 调用切面类中方法的类工厂
     private AspectInstanceFactory aspectInstanceFactory;
 
-    // 默认拦截所有的异常类型
-    private Class<?> discoveredThrowingType = Object.class;
-
-    // @AfterThrowing( value = "execution(* foo())", throwing = "java.lang.ClassNotFoundException") 中 throwing 的值
+    // 异常表达式
+    // @AfterThrowing( value = "execution()", throwing = "java.lang.ClassNotFoundException") 中 throwing 的值
     private String throwingName;
+
+    // 拦截的异常类型 默认拦截所有异常
+    private Class<?> discoveredThrowingType = Object.class;
 
     public CommonAdvice(Method aspectJAdviceMethod, AspectInstanceFactory aspectInstanceFactory) {
         aspectJAdviceMethod.setAccessible(true);
-        this.aspectJAdviceMethod = aspectJAdviceMethod;
-        this.aspectInstanceFactory = aspectInstanceFactory;
+        this.aspectJAdviceMethod = aspectJAdviceMethod;      // 通知注解标记的方法
+        this.aspectInstanceFactory = aspectInstanceFactory;  // 切面注解标记的类的Class
     }
 
     // 调用通知方法，完成简单的参数回显解析
-    protected Object invokeAdviceMethod(ProceedingJoinPoint pjp, Throwable ex) throws Throwable {
+    protected Object invokeAdviceMethod(ProceedingJoinPoint proceedingJoinPoint, Throwable ex) throws Throwable {
+
         // 准备方法参数
         int parameterCount = this.aspectJAdviceMethod.getParameterCount();
         Object[] args = new Object[parameterCount];
 
-        // 存在异常，@AfterThrowing 通知的调用
+        // 存在异常, @AfterThrowing 通知的调用
         if (ex != null) {
-            // 设置了 throwingName，但没有通知方法中没有参数，报错
-            // 例：对应默认的 @AfterThrowing ，注解中不设置 throwing
+            // 通知方法没有参数
             if (parameterCount == 0) {
+                // 设置 throwingName，但通知方法中没有参数，报错  即对应默认的 @AfterThrowing, 注解中不设置 throwing
                 if (this.throwingName != null) {
-                    throw new IllegalStateException("Throwing argument name '" + this.throwingName +
+                    throw new IllegalStateException("[[[[[[   MSG   Throwing argument name '" + this.throwingName +
                             "' was not bound in advice arguments");
                 }
-            } else {
-                // 通知方法如果有参数的话，第一个参数必须是异常类型
+            }
+            // 通知方法有参数
+            else {
+                // 第一个参数必须是异常类型
                 args[0] = ex;
             }
         }
 
-        // 存在 ProceedingJoinPoint， @Around 通知的调用
-        if (pjp != null) {
+        // 存在 ProceedingJoinPoint, @Around 通知的调用
+        if (proceedingJoinPoint != null) {
+            // 通知方法没有参数
             if (parameterCount == 0) {
-                throw new IllegalStateException("环绕通知的参数中缺少 ProceedingJoinPoint");
-            } else {
-                args[0] = pjp;
+                // 缺少 ProceedingJoinPoint 参数
+                throw new IllegalStateException("[[[[[[   MSG   环绕通知的参数中缺少 ProceedingJoinPoint");
+            }
+            // 通知方法有参数
+            else {
+                // 第一个参数必须是 ProceedingJoinPoint 类型
+                args[0] = proceedingJoinPoint;
             }
         }
         return invokeAdviceMethod(args);
     }
 
-    /**
-     * AfterThrowing 异常回显
-     * 环绕通知会用到通知方法的返回值，其他通知用不到
-     *
-     * @param args
-     * @return
-     */
+    // 执行切点通知方法
+    // AfterThrowing 异常回显 环绕通知会用到通知方法的返回值，其他通知用不到
     private Object invokeAdviceMethod(Object[] args) throws Throwable {
         try {
+
+            // 执行通知方法
             return this.aspectJAdviceMethod.invoke(this.aspectInstanceFactory.getAspectInstance(), args);
+
         } catch (IllegalAccessException e) {
             throw e;
         } catch (InvocationTargetException e) {
@@ -83,45 +85,51 @@ public abstract class CommonAdvice implements Advice, Ordered {
         }
     }
 
+    // 设置异常表达式
     protected void setThrowingName(String name) {
+        // ex 表达式
         if (name.equals("ex")) {
+            // 设置异常表达式
             this.throwingName = name;
-            // 下面的方法不行，因为编译后的 class 没有参数名信息，变成 arg0、arg1 这种
-            /*Parameter[] parameters = this.aspectJAdviceMethod.getParameters();
-            for (Parameter parameter : parameters) {
-                // 找到要拦截的异常类型
-                if (parameter.getName().equals(this.throwingName)) {
-                    this.discoveredThrowingType = parameter.getType();
-                    return;
-                }
-            }*/
-            // 规定如果 @AfterThrowing 的 throwing 参数设置为 ex，那么参数列表第 0 个必须是异常类
+
             Class<?> exClass = null;
+
+            // 异常参数判断
             try {
                 exClass = this.aspectJAdviceMethod.getParameterTypes()[0];
             } catch (ArrayIndexOutOfBoundsException e) {
-                throw new IllegalArgumentException("方法中缺少异常参数。method = " + this.aspectJAdviceMethod);
+                // @AfterThrowing 的 throwing 参数设置为 ex，那么参数列表第 0 个必须是异常类
+                throw new IllegalArgumentException("[[[[[[   MSG   方法中缺少异常参数。method = " + this.aspectJAdviceMethod);
             }
 
+            // 异常类型判断
             if (Throwable.class.isAssignableFrom(exClass)) {
                 this.discoveredThrowingType = exClass;
             } else {
-                throw new IllegalArgumentException("方法中缺少异常参数，找不到要拦截的异常类型。method = " + this.aspectJAdviceMethod);
+                // 找不到该异常类
+                throw new IllegalArgumentException("[[[[[[   MSG   方法中缺少异常参数，找不到要拦截的异常类型。method = " + this.aspectJAdviceMethod);
             }
-        } else if (name.length() > 0) {
+
+        }
+        // java.lang.ClassNotFoundException
+        else if (name.length() > 0) {
+            // 设置异常表达式
             this.throwingName = name;
+            // 加载异常类型
             try {
                 this.discoveredThrowingType = Class.forName(name);
             } catch (Throwable ex) {
-                throw new IllegalArgumentException("Throwing name '" + name +
-                        "' is neither a valid argument name nor the fully-qualified " +
-                        "name of a Java type on the classpath. Root cause: " + ex);
+                // 异常类型找不到
+                throw new IllegalArgumentException("[[[[[[   MSG   Throwing name '" + name + "' is neither a valid argument name nor the fully-qualified " + "name of a Java type on the classpath. Root cause: " + ex);
             }
-        } else {
-            // throwing 没提供，默认拦截索引异常
+        }
+        // throwing 没提供，默认拦截所有异常
+        else {
+            // throwing 没提供，默认拦截所有异常
         }
     }
 
+    // 获取拦截异常的类型
     protected Class<?> getDiscoveredThrowingType() {
         return this.discoveredThrowingType;
     }

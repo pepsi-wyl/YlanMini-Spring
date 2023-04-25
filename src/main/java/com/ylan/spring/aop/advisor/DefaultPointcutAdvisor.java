@@ -1,12 +1,7 @@
 package com.ylan.spring.aop.advisor;
 
 
-/**
- * @author by pepsi-wyl
- * @date 2023-04-20 21:22
- */
-
-// 默认切面
+// 默认切面实现类
 public class DefaultPointcutAdvisor implements Advisor {
 
     // 切点 pointcut

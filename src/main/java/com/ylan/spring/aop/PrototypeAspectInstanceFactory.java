@@ -1,8 +1,10 @@
 package com.ylan.spring.aop;
 
 
+import com.ylan.spring.interfaces.AspectInstanceFactory;
+
 // 提供调用切面方法的类工厂, 每次返回新的切面对象
-public class PrototypeAspectInstanceFactory implements AspectInstanceFactory{
+public class PrototypeAspectInstanceFactory implements AspectInstanceFactory {
 
     private Class<?> clazz;
 

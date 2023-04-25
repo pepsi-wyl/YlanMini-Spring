@@ -2,17 +2,15 @@ package com.ylan.spring.aop.advisor.joinpoint;
 
 import com.ylan.spring.aop.advisor.MethodInvocation;
 
-/**
- * @author by pepsi-wyl
- * @date 2023-04-20 21:20
- */
 
+// Spring 的实现 MethodInvocationProceedingJoinPoint 中就是内置了一个 MethodInvocation
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint {
 
+    // 方法拦截器调用链
     private final MethodInvocation methodInvocation;
 
-    public MethodInvocationProceedingJoinPoint(MethodInvocation mi) {
-        this.methodInvocation = mi;
+    public MethodInvocationProceedingJoinPoint(MethodInvocation invocation) {
+        this.methodInvocation = invocation;
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.ylan.spring.aop.proxy.ProxyFactory;
 import com.ylan.spring.aop.proxy.SingletonTargetSource;
 import com.ylan.spring.core.OrderComparator;
 import com.ylan.spring.interfaces.ApplicationContextAware;
+import com.ylan.spring.interfaces.AspectJAdvisorFactory;
 import com.ylan.spring.interfaces.SmartInstantiationAwareBeanPostProcessor;
 
 import java.lang.reflect.Method;
@@ -121,7 +122,7 @@ public class AnnotationAwareAspectJAutoProxyCreator implements SmartInstantiatio
         // 提供hook方法，用于对目标 Advisor 进行拓展
         // extendAdvisors(eligibleAdvisors);
 
-        // 对需要代理的 Advisor 进行排序
+        // 对具备条件Advisor 进行排序
         if (!eligibleAdvisors.isEmpty()) {
             OrderComparator.sort(eligibleAdvisors);
         }
@@ -143,7 +144,8 @@ public class AnnotationAwareAspectJAutoProxyCreator implements SmartInstantiatio
         return new ArrayList<>();
     }
 
-    // 候选 Advisor 遍历 beanFactory 中所有 bean，找到被 @Aspect 注解标注的 bean，再去 @Aspect 类中封装 Advisor
+    // 候选 Advisor 遍历 beanFactory 中所有 bean
+    // 利用 DefaultAspectJAdvisorFactory 找到被 @Aspect 注解标注的 bean，再去 @Aspect 类中封装 Advisor
     private List<Advisor> findCandidateAdvisorsInAspect() {
         // 从候选Advisor缓存List中取
         if (this.cachedAdvisors != null) {

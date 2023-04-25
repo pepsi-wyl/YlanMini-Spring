@@ -5,21 +5,17 @@ import com.ylan.spring.aop.util.AopUtils;
 import java.lang.reflect.Method;
 import java.util.List;
 
-/**
- * @author by pepsi-wyl
- * @date 2023-04-20 21:22
- */
 
+// 默认方法拦截器调用链类
 public class DefaultMethodInvocation implements MethodInvocation {
 
     private Object target;  // 代理对象
     private Method method;  // 代理对象方法
     private Object[] args;  // 代理对象方法参数
 
-    List<?> methodInterceptorList; //
+    List<?> methodInterceptorList; // 此 method 拦截器链
 
-    // 调用位置
-    private int currentInterceptorIndex = -1;
+    private int currentInterceptorIndex = -1; // 调用位置
 
     public DefaultMethodInvocation(Object target, Method method, Object[] args, List<Interceptor> methodInterceptorList) {
         this.target = target;
@@ -32,7 +28,7 @@ public class DefaultMethodInvocation implements MethodInvocation {
         this.methodInterceptorList = methodInterceptorList;
     }
 
-    //
+    // 执行拦截器链
     @Override
     public Object proceed() throws Throwable {
         // 调用目标, 返回并结束递归
@@ -42,6 +38,7 @@ public class DefaultMethodInvocation implements MethodInvocation {
         }
         // 逐一调用通知, currentInterceptorIndex + 1
         MethodInterceptor methodInterceptor = (MethodInterceptor) this.methodInterceptorList.get(++currentInterceptorIndex);
+        // 当前 MethodInterceptor 执行 Invoke 方法  (参数为当前MethodInvocation对象)
         return methodInterceptor.invoke(this);
     }
 
