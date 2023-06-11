@@ -2,7 +2,7 @@
 ## 简介
 Github仓库链接: [https://github.com/pepsi-wyl/YlanMini-Spring](https://github.com/pepsi-wyl/YlanMini-Spring)  
 ![img_1.png](https://cdn.nlark.com/yuque/0/2023/png/23219042/1682429105899-8a176b27-715f-4670-b259-b13d6d3c8672.png#averageHue=%233f3a37&clientId=u1d344895-139b-4&from=paste&height=194&id=u65546ebf&originHeight=194&originWidth=622&originalType=binary&ratio=1&rotation=0&showTitle=false&size=102437&status=done&style=none&taskId=u96aff9b5-b9dc-4726-bbb9-349550162b5&title=&width=622)  
-一个玩具级的仿Spring项目，主要实现了 Spring IOC(依赖注入) 和 Spring AOP(面向切面编程)，实现较Spring源码简单，有助于学习和理解Spring思想和源码。
+一个简化版的spring框架，主要实现了 Spring IOC(依赖注入) 和 Spring AOP(面向切面编程)，实现较Spring源码简单，有助于学习和理解Spring思想和源码。，主要实现了 Spring IOC(依赖注入) 和 Spring AOP(面向切面编程)，实现较Spring源码简单，有助于学习和理解Spring思想和源码。
 使用三级缓存解决属性注入和set方法注入的循环依赖问题，@Lazy注解、ObjectFactory 解决构造方法注入的循环依赖问题。
 完成了5种通知类型 (@Before、 @AfterReturning、@After、@AfterThrowing、@Around)的解析，对符合切点的目标对象进行代理增强，并对通知进行顺序链式调用。
 ## IOC
